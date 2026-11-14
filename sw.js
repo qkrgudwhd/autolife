@@ -1,10 +1,10 @@
 // 오프라인용 — 앱 파일을 기기에 담아 두어 인터넷 없이도 열린다.
 // 판을 올릴 때는 VERSION 을 바꾸면 새 파일로 갈아 끼운다.
-const VERSION = 'autolife-0.1.0';
+const VERSION = 'autolife-0.1.1';
 const FILES = [
   './', 'index.html', 'manifest.webmanifest', 'css/app.css', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png',
   'js/main.js', 'js/config.js', 'js/db.js', 'js/ui.js', 'js/actions.js', 'js/modules.js', 'js/snapshot.js',
-  'js/core/dates.js', 'js/core/parser.js', 'js/core/logic.js', 'js/core/policy.js', 'js/core/automation.js', 'js/core/ai.js', 'js/core/crypt.js',
+  'js/core/dates.js', 'js/core/parser.js', 'js/core/logic.js', 'js/core/policy.js', 'js/core/automation.js', 'js/core/ai.js', 'js/core/crypt.js', 'js/core/ics.js',
   'js/views/home.js', 'js/views/inbox.js', 'js/views/plan.js', 'js/views/money.js', 'js/views/life.js', 'js/views/assistant.js', 'js/views/settings.js', 'js/views/forms.js', 'js/views/quick.js',
 ];
 
@@ -18,7 +18,8 @@ self.addEventListener('fetch', (e) => {
   const u = new URL(e.request.url);
   if (e.request.method !== 'GET' || u.origin !== location.origin) return; // AI 호출 등 바깥 요청은 건드리지 않음
   // 앱 파일: 먼저 네트워크(새 판), 안 되면 담아 둔 것
-  e.respondWith(fetch(e.request).then((r) => { const cp = r.clone(); if (r.ok) caches.open(VERSION).then((c) => c.put(e.request, cp)); return r; })
+  // cache:'no-cache' = 브라우저가 들고 있는 옛 파일 대신 서버에 새 판이 있는지 꼭 물어본다 (새 판이 늦게 보이는 일을 막음)
+  e.respondWith(fetch(e.request, { cache: 'no-cache' }).then((r) => { const cp = r.clone(); if (r.ok) caches.open(VERSION).then((c) => c.put(e.request, cp)); return r; })
     .catch(() => caches.match(e.request, { ignoreSearch: true }).then((r) => r || caches.match('index.html'))));
 });
 self.addEventListener('notificationclick', (e) => {
