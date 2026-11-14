@@ -125,6 +125,8 @@ export async function loadState() {
   const vals = await Promise.all(names.map((n) => db.all(n)));
   const st = Object.fromEntries(names.map((n, i) => [n, vals[i]]));
   st.expandedTomorrow = expandEvents(st.events, today(), addDays(today(), 1));
+  st.recordCount = vals.reduce((a, v) => a + v.length, 0);
+  st.lastBackup = (await getSettings()).lastBackup || null;
   return st;
 }
 
