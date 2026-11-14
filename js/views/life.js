@@ -267,3 +267,24 @@ export async function auditView(el) {
   el.innerHTML = `<section class="card"><h1>🧾 실행 기록</h1><p class="muted small">누가(나·AI·자동화) 무엇을 했는지 모두 남겨요. 「AI 가 뭘 했지?」 싶을 때 여기서 확인하세요.</p>
    ${all.length ? `<ul class="list">${all.map((a) => `<li class="row"><span><b>${R[a.result] || '•'} ${esc(a.detail)}</b><small>${esc(a.actor)} · ${new Date(a.at).toLocaleString('ko-KR')}</small></span></li>`).join('')}</ul>` : empty('🧾', '기록이 없어요')}</section>`;
 }
+
+// ---------------------------------------------------------------- 통합 검색
+let lastQ = '';
+export async function searchView(el) {
+  el.innerHTML = `<section class="card"><h1>🔍 찾기</h1>
+    <input type="search" id="sq" placeholder="일정·할 일·돈·문서·사람·메모… 무엇이든" value="${esc(lastQ)}" autocomplete="off" enterkeyhint="search">
+    <p class="muted small">띄어 쓰면 모두 들어간 것만 찾아요 (예: 「병원 해운대」). 금액·날짜(11-18)로도 찾을 수 있어요.</p></section>
+    <div id="sres"></div>`;
+  const { searchAll, SEARCH_STORES } = await import('../core/search.js');
+  const data = Object.fromEntries(await Promise.all(SEARCH_STORES.map(async (s) => [s, await db.all(s)])));
+  const box = el.querySelector('#sres'), inp = el.querySelector('#sq');
+  const run = () => {
+    lastQ = inp.value;
+    const groups = searchAll(data, inp.value);
+    box.innerHTML = !inp.value.trim() ? '' : groups.length
+      ? groups.map((g) => `<section class="card"><h2>${g.icon} ${esc(g.label)} <small>${g.total}</small></h2><ul class="list">${g.items.map((i) => `<li class="row"><a href="${i.link}"><b>${esc(i.title)}</b><small>${esc(i.sub)}</small></a></li>`).join('')}</ul>${g.total > g.items.length ? `<p class="muted small">${g.total - g.items.length}개 더 있어요. 낱말을 더 넣어 좁혀 보세요.</p>` : ''}</section>`).join('')
+      : `<section class="card">${empty('🔍', `「${esc(inp.value)}」 을(를) 찾지 못했어요`)}</section>`;
+  };
+  let tm; inp.oninput = () => { clearTimeout(tm); tm = setTimeout(run, 150); };
+  run(); inp.focus();
+}

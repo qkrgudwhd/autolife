@@ -13,7 +13,7 @@ export const MENU = [
   { g: '돈', items: [['#/money', '💳', '머니 가드'], ['#/subs', '🔁', '구독·고정비'], ['#/m/invoices', '💰', '받을 돈·견적', '프리랜서 자영업자']] },
   { g: '생활', items: [['#/m/people', '👨‍👩‍👧', '사람·기념일'], ['#/m/assets', '🛠️', '집·차·정기 관리'], ['#/m/orders', '📦', '쇼핑·택배·반품'], ['#/docs', '📄', '문서 보관함'], ['#/memos', '📝', '메모·초안']] },
   { g: '일·공부', items: [['#/m/study', '🎓', '공부·시험·과제', '대학생·수험생'], ['#/m/clients', '🤝', '거래처·고객', '프리랜서 자영업자']] },
-  { g: '똑똑하게', items: [['#/approvals', '🛡️', '승인 센터'], ['#/automations', '⚙️', '자동화'], ['#/memory', '🧠', 'AI 기억'], ['#/report', '📈', '리포트'], ['#/notices', '🔔', '알림'], ['#/audit', '🧾', '실행 기록']] },
+  { g: '똑똑하게', items: [['#/search', '🔍', '찾기'], ['#/approvals', '🛡️', '승인 센터'], ['#/automations', '⚙️', '자동화'], ['#/memory', '🧠', 'AI 기억'], ['#/report', '📈', '리포트'], ['#/notices', '🔔', '알림'], ['#/audit', '🧾', '실행 기록']] },
   { g: '앱', items: [['#/settings', '⚙️', '설정'], ['#/guide', '📘', '사용법·설치']] },
 ];
 
@@ -86,6 +86,8 @@ export async function settings(el, ctx) {
     <p class="muted small">이번 달 AI 호출 ${mu.length}번 · 토큰 ${tok.toLocaleString('ko-KR')}개 (요금은 각 회사 사용량 화면에서 확인하세요)</p></section>
 
   <section class="card"><h2>🔒 잠금·백업</h2>
+    <p class="small" id="storeInfo">저장 공간 확인 중…</p>
+    <p class="small">마지막 백업: <b>${s.lastBackup ? esc(s.lastBackup) : '아직 없음'}</b></p>
     <div class="row-btns"><button class="btn" id="pin">${s.pinHash ? '앱 잠금 끄기' : '앱 잠금(비밀번호 4~8자리) 켜기'}</button></div>
     <p class="muted small">휴대폰을 바꾸거나 브라우저 기록을 지우면 기록이 사라질 수 있어요. <b>가끔 백업 파일을 저장</b>해 두세요. 백업에는 AI 열쇠가 들어가지 않아요.</p>
     <div class="row-btns"><button class="btn primary" id="exp">💾 백업 파일 저장</button><button class="btn" id="expLock">🔐 암호 걸어 백업</button><label class="btn">📂 백업 불러오기<input type="file" id="imp" accept=".json,application/json" hidden></label></div>
@@ -93,6 +95,7 @@ export async function settings(el, ctx) {
 
   <section class="card"><h2>ℹ️ 정보</h2><p>${esc(APP.name)} (${esc(APP.nameEn)}) ${esc(APP.version)}<br><span class="muted small">${esc(APP.slogan)}</span></p>${APP.support ? `<p>문의: ${esc(APP.support)}</p>` : ''}<p class="muted small">의료·법률·세무·금융 판단은 전문가와 상의하세요. 이 앱의 정보는 참고용이에요.</p></section>`;
 
+  storageInfo().then((x) => { const e = el.querySelector('#storeInfo'); if (e) e.innerHTML = x; });
   const basic = el.querySelector('#basic'); bindForm(basic);
   basic.onsubmit = async (e) => { e.preventDefault(); const v = readForm(basic, [{ k: 'name' }, { k: 'theme' }, { k: 'fontScale' }, { k: 'senior', type: 'checkbox' }, { k: 'userTypes', type: 'chips' }, { k: 'autoApproveRisk' }]);
     await saveSettings({ ...v, fontScale: Number(v.fontScale), autoApproveRisk: Number(v.autoApproveRisk) }); await audit('settings', `설정 저장 (바로 실행 범위 ${v.autoApproveRisk})`); toast('저장했어요'); ctx.refresh(); };
@@ -135,8 +138,8 @@ export async function settings(el, ctx) {
   };
   const download = (text, name) => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: 'application/json' })); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); };
   const stamp = () => new Date().toISOString().slice(0, 10);
-  el.querySelector('#exp').onclick = async () => { download(JSON.stringify(await exportAll()), `${APP.nameEn}_백업_${stamp()}.json`); await audit('backup', '백업 파일 저장'); toast('백업 파일을 저장했어요'); };
-  el.querySelector('#expLock').onclick = async () => { const p = prompt('백업 암호 (잊으면 열 수 없어요)'); if (!p) return; download(await lock(JSON.stringify(await exportAll()), p), `${APP.nameEn}_잠금백업_${stamp()}.json`); toast('암호 건 백업을 저장했어요'); };
+  el.querySelector('#exp').onclick = async () => { download(JSON.stringify(await exportAll()), `${APP.nameEn}_백업_${stamp()}.json`); await audit('backup', '백업 파일 저장'); await saveSettings({ lastBackup: stamp() }); toast('백업 파일을 저장했어요'); ctx.refresh(); };
+  el.querySelector('#expLock').onclick = async () => { const p = prompt('백업 암호 (잊으면 열 수 없어요)'); if (!p) return; download(await lock(JSON.stringify(await exportAll()), p), `${APP.nameEn}_잠금백업_${stamp()}.json`); await audit('backup', '암호 백업 저장'); await saveSettings({ lastBackup: stamp() }); toast('암호 건 백업을 저장했어요'); ctx.refresh(); };
   el.querySelector('#imp').onchange = async (e) => {
     const f = e.target.files[0]; if (!f) return;
     try {
@@ -181,4 +184,21 @@ export function guide(el) {
   <p>모든 기록은 <b>이 휴대폰(브라우저) 안</b>에만 있어요. 만든 사람에게도 보이지 않아요. AI 를 쓸 때만, 고른 기록의 요약이 내 열쇠로 AI 회사에 가요(개인번호는 가려서). 휴대폰을 바꾸기 전에는 <b>설정 → 백업</b>을 꼭 하세요.</p>
   <h2>6. 이 앱이 하지 않는 일</h2>
   <p>송금·결제·구매·해지 대행, 남의 메시지 몰래 읽기, 비밀번호 보관. 대신 <b>미리 알려 주고, 초안을 만들고, 할 일로 바꿔 드려요</b>. 마지막 버튼은 언제나 내가 누릅니다.</p></section>`;
+}
+
+/** 저장 공간 보호 상태와 쓰는 양 (브라우저가 공간이 모자랄 때 기록을 지우지 못하게) */
+export async function protectStorage() {
+  try {
+    if (!navigator.storage?.persist) return null;
+    if (await navigator.storage.persisted()) return true;
+    return await navigator.storage.persist();
+  } catch { return null; }
+}
+async function storageInfo() {
+  const p = await protectStorage();
+  let use = '';
+  try { const e = await navigator.storage.estimate(); use = ` · 쓰는 양 ${(e.usage / 1048576).toFixed(1)}MB`; } catch {}
+  if (p === true) return `🛡️ 저장 공간 보호: <b>켜짐</b> — 휴대폰 공간이 모자라도 브라우저가 기록을 지우지 않아요${use}`;
+  if (p === false) return `⚠️ 저장 공간 보호: <b>꺼짐</b> — 앱을 <b>홈 화면에 설치</b>하면 대개 켜져요. 그 전까지는 백업을 자주 해 주세요${use}`;
+  return `저장 공간 보호를 이 브라우저가 지원하지 않아요. 백업을 자주 해 주세요${use}`;
 }
