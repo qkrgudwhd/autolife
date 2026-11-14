@@ -1,0 +1,28 @@
+{
+  "name": "오토라이프 — 나의 생활 비서",
+  "short_name": "오토라이프",
+  "description": "일정·할 일·돈·생활을 대신 기억하고 미리 챙겨 주는 생활 비서",
+  "lang": "ko",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f4f6fb",
+  "theme_color": "#3b5bdb",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ],
+  "share_target": {
+    "action": "./index.html",
+    "method": "GET",
+    "params": { "title": "title", "text": "text", "url": "url" }
+  },
+  "shortcuts": [
+    { "name": "문자 담기", "url": "./index.html#/inbox" },
+    { "name": "지출 적기", "url": "./index.html#/money" },
+    { "name": "AI 비서", "url": "./index.html#/ai" }
+  ]
+}
