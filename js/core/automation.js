@@ -21,6 +21,7 @@ export const BUILTIN = [
   { id: 'exam', name: '시험·과제 D-day', desc: '시험 7일 전·전날, 과제 마감 전날 알려 줍니다', group: '학습', on: true },
   { id: 'medicine', name: '오늘 루틴 남음', desc: '저녁까지 체크하지 않은 복약·루틴을 알려 줍니다', group: '건강', on: true },
   { id: 'doc_expiry', name: '서류 만료', desc: '여권·면허·계약 등 만료 30일 전에 알려 줍니다', group: '문서', on: true },
+  { id: 'backup_reminder', name: '백업 알림', desc: '기록이 쌓였는데 2주 넘게 백업하지 않았으면 일요일에 알려 줍니다 (기록은 휴대폰에만 있어요)', group: '안전', on: true },
   { id: 'weekly_report', name: '주간 리포트', desc: '일요일에 한 주 정리를 보여 줍니다', group: '리포트', on: true },
 ];
 
@@ -133,6 +134,10 @@ export function dailyScan(state, recipeSettings = {}, now = new Date()) {
       for (const slot of r.slots?.length ? r.slots : ['']) if (!doneToday.has(r.id + '|' + slot)) left.push(r.name + (slot ? `(${slot})` : ''));
     }
     if (left.length) push('medicine', 'today', `오늘 남은 루틴 ${left.length}개`, left.slice(0, 5).join(', '), 'info', '#/routine');
+  }
+  if (on('backup_reminder') && parseYmd(t).getDay() === 0 && (state.recordCount || 0) >= 20) {
+    const since = state.lastBackup ? diffDays(state.lastBackup, t) : null;
+    if (since === null || since >= 14) push('backup_reminder', 'week', since === null ? '아직 백업을 한 번도 안 했어요' : `마지막 백업이 ${since}일 전이에요`, `기록 ${state.recordCount}개는 이 휴대폰에만 있어요. 설정 → 💾 백업 파일 저장을 눌러 두세요.`, 'warn', '#/settings');
   }
   if (on('weekly_report') && parseYmd(t).getDay() === 0) push('weekly_report', 'week', '이번 주 정리가 준비됐어요', '일정·할 일·지출·루틴을 한눈에 보세요.', 'info', '#/report');
   return out;
