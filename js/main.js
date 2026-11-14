@@ -9,7 +9,7 @@ import { money, subs } from './views/money.js';
 import { routine, docs, moduleView, memos, notices, report, automations, memory, auditView } from './views/life.js';
 import { assistant } from './views/assistant.js';
 import { settings, more, onboarding, guide, lockScreen } from './views/settings.js';
-import { esc } from './ui.js';
+import { esc, toast } from './ui.js';
 import { MODULES } from './modules.js';
 
 const ROUTES = {
@@ -101,7 +101,11 @@ async function start() {
   runDaily(true).catch(console.error);
   setInterval(() => runDaily().catch(console.error), 5 * 60 * 1000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) runDaily().catch(console.error); });
-  if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch((e) => console.warn('SW', e));
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+    const had = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener('controllerchange', () => { if (had) toast(`새 판(${APP.version})으로 바뀌었어요 ✨`); });
+    navigator.serviceWorker.register('sw.js').catch((e) => console.warn('SW', e));
+  }
   // 설치 안내 (안드로이드 크롬)
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();

@@ -179,3 +179,15 @@ export function listen(onText, onEnd) {
 
 /** 부르는 이름 + 님 (이미 「님」으로 끝나면 또 붙이지 않는다) */
 export const honor = (n) => (n ? (/님$/.test(n.trim()) ? n.trim() : `${n.trim()}님`) : '');
+
+/** 파일을 휴대폰에 넘긴다: 공유창(→ 달력 앱 등)이 되면 공유, 안 되면 내려받기 */
+export async function shareFile(text, filename, mime) {
+  const file = new File([text], filename, { type: mime });
+  try {
+    if (navigator.canShare?.({ files: [file] })) { await navigator.share({ files: [file], title: filename }); return 'shared'; }
+  } catch (e) { if (e.name === 'AbortError') return 'canceled'; }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(file); a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+  return 'downloaded';
+}
