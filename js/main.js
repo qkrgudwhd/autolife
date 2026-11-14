@@ -104,7 +104,7 @@ async function start() {
   document.addEventListener('visibilitychange', () => { if (!document.hidden) runDaily().catch(console.error); });
   if ('serviceWorker' in navigator && location.protocol !== 'file:') {
     const had = !!navigator.serviceWorker.controller;
-    navigator.serviceWorker.addEventListener('controllerchange', () => { if (had) toast(`새 판(${APP.version})으로 바뀌었어요 ✨`); });
+    navigator.serviceWorker.addEventListener('controllerchange', () => { if (had) toast('새 판을 받았어요 ✨ 앱을 닫았다 다시 열면 바뀌어요', 5000); });
     navigator.serviceWorker.register('sw.js').catch((e) => console.warn('SW', e));
   }
   // 설치 안내 (안드로이드 크롬)
