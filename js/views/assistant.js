@@ -24,6 +24,7 @@ export async function assistant(el, ctx) {
   const msgs = el.querySelector('#msgs');
   msgs.scrollTop = msgs.scrollHeight;
   const q = el.querySelector('#q');
+  try { const d = sessionStorage.getItem('al_ai_draft'); if (d) { q.value = d; sessionStorage.removeItem('al_ai_draft'); q.focus(); } } catch {} // 다른 화면이 넘겨준 질문 — 보내기는 직접
   el.querySelectorAll('[data-sg]').forEach((b) => (b.onclick = () => { q.value = b.dataset.sg; send(); }));
   el.querySelector('#cf').onsubmit = (e) => { e.preventDefault(); send(); };
   q.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } });
