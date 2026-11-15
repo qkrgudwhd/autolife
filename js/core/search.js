@@ -15,6 +15,7 @@ const SOURCES = {
   invoices: { label: '받을 돈', icon: '💰', link: () => '#/m/invoices', text: (r) => [r.client, r.title, r.note, String(r.amount)], title: (r) => `${r.client} ${Number(r.amount || 0).toLocaleString('ko-KR')}원`, sub: (r) => `${r.status || ''} ${r.dueDate || ''}` },
   memos: { label: '메모', icon: '📝', link: () => '#/memos', text: (r) => [r.text, r.to], title: (r) => String(r.text || '').slice(0, 40), sub: (r) => (r.kind === 'draft' ? '초안' : '메모') },
   memory: { label: 'AI 기억', icon: '🧠', link: () => '#/memory', text: (r) => [r.text, r.kind], title: (r) => r.text, sub: (r) => r.kind || '' },
+  shopping: { label: '장보기', icon: '🛒', link: () => '#/shop', text: (r) => (r.archived ? [] : [r.name, r.qty, r.memo, r.cat]), title: (r) => `${r.done ? '✔ ' : ''}${r.name}${r.qty ? ' ' + r.qty : ''}`, sub: (r) => r.cat || '' },
   routines: { label: '루틴', icon: '💊', link: () => '#/routine', text: (r) => [r.name, r.dose, r.goal, r.note], title: (r) => r.name, sub: (r) => r.dose || r.kind || '' },
 };
 export const SEARCH_STORES = Object.keys(SOURCES);
