@@ -8,6 +8,7 @@ import { submit, approve, reject, afterEvent } from '../actions.js';
 import { esc, toast, won, empty, confirmBox } from '../ui.js';
 import { prettyDate, prettyTime, today } from '../core/dates.js';
 import { eventDialog, taskDialog, txDialog } from './forms.js';
+import { sendToPhoneCalendar } from './plan.js';
 
 const EXAMPLES = [
   '11월 18일 오후 2시 부산 해운대구 좋은하루병원 예약입니다. 15분 전까지 방문해 주세요.',
@@ -74,17 +75,32 @@ export async function inbox(el, ctx) {
       const out = await submit([{ ...p, source: 'user' }], 'user', 'inbox');
       b.disabled = true; b.textContent = out.done[0]?.skipped ? '이미 있음' : '✔ 등록됨';
       toast(out.done[0]?.message || out.blocked[0]?.reason || '처리했어요');
+      const ev = out.done[0]?.record;
+      if (p.action === 'event.create' && ev?.id) addPhoneCal(b, ev);
     }));
     box.querySelectorAll('[data-edit]').forEach((b) => (b.onclick = () => {
       const [i, j] = b.dataset.edit.split(':').map(Number);
       const p = results[i].r.proposals[j];
-      const done = () => { b.closest('.prop').querySelector('[data-go]').disabled = true; b.closest('.prop').querySelector('[data-go]').textContent = '✔ 등록됨'; };
+      const done = (saved) => {
+        const go = b.closest('.prop').querySelector('[data-go]'); go.disabled = true; go.textContent = '✔ 등록됨';
+        if (p.action === 'event.create' && saved?.id) addPhoneCal(go, saved);
+      };
       if (p.action === 'event.create') eventDialog(p.data, done);
       else if (p.action === 'task.create') taskDialog(p.data, done);
       else if (p.action === 'transaction.create') txDialog(p.data, done);
       else toast('이 항목은 바로 등록만 할 수 있어요');
     }));
   }
+}
+
+/** 등록한 일정 옆에 「휴대폰 달력에도」 — 앱을 닫아도 휴대폰이 알림을 울리게 */
+function addPhoneCal(after, ev) {
+  if (after.parentElement.querySelector('[data-pcal]')) return;
+  const btn = document.createElement('button');
+  btn.className = 'btn small'; btn.dataset.pcal = ev.id; btn.textContent = '📲 휴대폰 달력에도';
+  btn.title = '앱을 닫아 두어도 휴대폰이 알림을 울려요';
+  btn.onclick = async () => { await sendToPhoneCalendar([ev]); btn.textContent = '📲 보냈어요'; };
+  after.after(btn);
 }
 
 function resultCard(r, i) {

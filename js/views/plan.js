@@ -2,8 +2,8 @@
 import { db, audit } from '../db.js';
 import { expandEvents, conflicts, sortTasks, isDuplicateEvent } from '../core/logic.js';
 import { today, addDays, parseYmd, ymd, pad, prettyDate, prettyTime, addMinutes, WEEK_KO, diffDays } from '../core/dates.js';
-import { toICS, parseICS } from '../core/ics.js';
-import { esc, toast, empty, ddayBadge, shareFile } from '../ui.js';
+import { toICS, parseICS, scheduleText } from '../core/ics.js';
+import { esc, toast, empty, ddayBadge, shareFile, shareText } from '../ui.js';
 import { eventDialog, taskDialog } from './forms.js';
 
 const TYPE_ICON = { 약속: '🤝', 회의: '💼', 병원: '🏥', '수업·시험': '🎓', 마감: '⏰', 납부: '🧾', 경조사: '🎉', 여행: '✈️', 운동: '🏃', 가족: '👨‍👩‍👧', 개인: '🙂', 기타: '📌' };
@@ -45,7 +45,7 @@ export async function calendar(el, ctx) {
     ${dayEv.length ? `<ul class="list">${dayEv.map(evRow).join('')}</ul>` : '<p class="muted pad">이날 일정이 없어요.</p>'}
     ${(dueByDay[sel] || []).length ? `<h3>이날 마감인 할 일</h3><ul class="list">${dueByDay[sel].map((x) => `<li class="row"><a href="#/tasks"><b>✅ ${esc(x.title)}</b></a></li>`).join('')}</ul>` : ''}
   </section>
-  <section class="card"><h2>🗓 앞으로 7일</h2>${week.length ? `<ul class="list">${week.map((e) => `<li class="row"><a href="#" data-ev="${e.id}" data-date="${e.date}"><b>${TYPE_ICON[e.type] || '📌'} ${esc(e.title)}</b><small>${prettyDate(e.date)} ${e.time ? prettyTime(e.time) : '종일'}${e.place ? ' · ' + esc(e.place) : ''}</small></a>${ddayBadge(diffDays(t, e.date))}</li>`).join('')}</ul>` : '<p class="muted pad">7일 안에 일정이 없어요.</p>'}</section>
+  <section class="card"><div class="card-head"><h2>🗓 앞으로 7일</h2>${week.length ? '<button class="btn small" data-wtext title="가족·동료에게 카톡·문자로">📤 글로 보내기</button>' : ''}</div>${week.length ? `<ul class="list">${week.map((e) => `<li class="row"><a href="#" data-ev="${e.id}" data-date="${e.date}"><b>${TYPE_ICON[e.type] || '📌'} ${esc(e.title)}</b><small>${prettyDate(e.date)} ${e.time ? prettyTime(e.time) : '종일'}${e.place ? ' · ' + esc(e.place) : ''}</small></a>${ddayBadge(diffDays(t, e.date))}</li>`).join('')}</ul>` : '<p class="muted pad">7일 안에 일정이 없어요.</p>'}</section>
   <section class="card tip"><h2>📲 휴대폰 달력과 함께 쓰기</h2>
     <p class="small">일정을 <b>휴대폰 기본 달력</b>(구글·삼성·아이폰 캘린더)에 넣어 두면, 오토라이프를 닫아 두어도 <b>휴대폰이 직접 알림을 울려요</b>. 미리 알림 시간도 같이 들어가요.</p>
     <div class="row-btns"><button class="btn primary" data-ics="upcoming">앞으로 일정 보내기</button><button class="btn" data-ics="all">모든 일정 보내기</button><label class="btn">📥 달력 파일 가져오기<input type="file" id="icsIn" accept=".ics,text/calendar" hidden></label></div>
@@ -61,6 +61,10 @@ export async function calendar(el, ctx) {
     ev.checklist[+i].done = c.checked; await db.put('events', ev);
   }));
   el.querySelectorAll('[data-ics]').forEach((b) => (b.onclick = () => sendToPhoneCalendar(b.dataset.ics === 'all' ? events : events.filter((e) => (e.repeat?.freq && e.repeat.freq !== 'none') || e.date >= t))));
+  el.querySelector('[data-wtext]')?.addEventListener('click', async () => {
+    const r = await shareText(scheduleText(week, '📅 앞으로 7일 일정 (오토라이프)'), '앞으로 7일 일정');
+    if (r !== 'canceled') await audit('event.share', `7일 일정 ${week.length}건 글로 보냄 (${r})`);
+  });
   el.querySelectorAll('[data-ics1]').forEach((b) => (b.onclick = async () => sendToPhoneCalendar([await db.get('events', b.dataset.ics1)])));
   el.querySelector('#icsIn').onchange = async (e) => {
     const f = e.target.files[0]; if (!f) return;
@@ -79,7 +83,7 @@ export async function calendar(el, ctx) {
   };
 }
 
-async function sendToPhoneCalendar(list) {
+export async function sendToPhoneCalendar(list) {
   list = list.filter(Boolean);
   if (!list.length) return toast('보낼 일정이 없어요');
   const r = await shareFile(toICS(list), `autolife_${today()}.ics`, 'text/calendar');
