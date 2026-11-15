@@ -26,7 +26,7 @@ export async function more(el) {
 // ---------------------------------------------------------------- 처음 안내
 export function onboarding(done) {
   const body = `<div class="onb"><p class="big-text">👋 반가워요! <b>${esc(APP.name)}</b>는 일정·할 일·돈·생활을 대신 기억하고 미리 챙겨 드리는 비서예요.</p>
-    <ul class="checks"><li>📱 기록은 <b>이 휴대폰 안에만</b> 저장돼요 (서버 없음)</li><li>🛡️ AI 가 하자는 일도 <b>내가 승인해야</b> 실행돼요</li><li>🚫 돈을 보내거나 결제하는 기능은 <b>아예 없어요</b></li><li>🆓 AI 없이도 기본 기능은 모두 무료로 돌아가요</li></ul>
+    <ul class="checks"><li>📱 기록은 <b>이 기기(휴대폰·PC) 안에만</b> 저장돼요 (서버 없음)</li><li>🛡️ AI 가 하자는 일도 <b>내가 승인해야</b> 실행돼요</li><li>🚫 돈을 보내거나 결제하는 기능은 <b>아예 없어요</b></li><li>🆓 AI 없이도 기본 기능은 모두 무료로 돌아가요</li></ul>
     <form class="form">${fieldHtml({ k: 'name', label: '뭐라고 불러 드릴까요?', placeholder: '예: 별님', half: false })}
     ${fieldHtml({ k: 'userTypes', label: '나는 (여러 개 골라도 돼요)', type: 'chips', options: USER_TYPES })}
     ${fieldHtml({ k: 'senior', label: '큰 글씨·쉬운 화면(시니어 모드)', type: 'checkbox' })}</form></div>`;

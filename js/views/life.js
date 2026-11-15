@@ -72,7 +72,7 @@ export async function docs(el, ctx) {
   const hasAI = Object.values(s.ai.providers).some((p) => p.key);
   el.innerHTML = `
   <section class="card"><div class="card-head"><h1>📄 문서 보관함</h1><button class="btn primary small" data-add>+ 문서</button></div>
-    <p class="muted small">영수증·계약서·보증서를 사진으로 찍어 두세요. 이 휴대폰 안에만 저장돼요. 신분증·통장 사본은 꼭 필요할 때만 두고, 백업 파일은 암호를 걸어 주세요.${hasAI ? ' 🤖 「AI로 읽기」를 누르면 사진 속 글자·금액·날짜를 읽어 드려요.' : ''}</p>
+    <p class="muted small">영수증·계약서·보증서를 사진으로 찍어 두세요. 이 기기(휴대폰·PC) 안에만 저장돼요. 신분증·통장 사본은 꼭 필요할 때만 두고, 백업 파일은 암호를 걸어 주세요.${hasAI ? ' 🤖 「AI로 읽기」를 누르면 사진 속 글자·금액·날짜를 읽어 드려요.' : ''}</p>
     <input type="search" id="dq" placeholder="🔍 이름·내용·꼬리표로 찾기" value="${esc(docQ)}">
   </section>
   <section class="card">${shown.length ? `<ul class="list">${shown.map((d) => `<li class="row"><a href="#" data-ed="${d.id}"><b>${d.file ? '🖼️' : '📄'} ${esc(d.title)}</b><small>${esc(d.type || '')}${d.date ? ' · ' + d.date : ''}${d.amount ? ' · ' + won(d.amount) : ''}${d.tags ? ' · #' + esc(d.tags) : ''}</small></a>${d.expires ? ddayBadge(diffDays(today(), d.expires)) : ''}${d.file ? `<button class="btn small" data-view="${d.id}">보기</button>` : ''}</li>`).join('')}</ul>` : empty('📄', q ? '찾는 문서가 없어요' : '보관한 문서가 없어요')}</section>`;
