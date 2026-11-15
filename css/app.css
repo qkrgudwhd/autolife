@@ -202,3 +202,7 @@ fieldset.prov legend { font-weight: 700; padding: 0 4px; } fieldset.prov legend 
 
 @media (max-width: 380px) { .field.half { width: 100%; } .stats { gap: 4px; } .quick-row { gap: 4px; } }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+.recipe { padding: 8px 0; border-bottom: 1px solid var(--line); list-style: none; }
+.recipe:last-child { border-bottom: 0; }
+.recipe summary { cursor: pointer; padding: 4px 0; min-height: 32px; }
+.recipe p { margin: 4px 0 6px; }
