@@ -3,7 +3,7 @@ export const APP = {
   name: '오토라이프',
   nameEn: 'AutoLife',
   slogan: '내가 기억하지 않아도, 기억하고 준비하고 — 내가 허락하면 해 둡니다',
-  version: '0.1.5',
+  version: '0.1.6',
   maker: '오토라이프 만든 이',      // 판매·배포할 때 내 이름(상호)으로
   support: '',                      // 문의처 (메일·카톡 채널 주소 등). 비워 두면 안 보임
   primary: '#3b5bdb',               // 주 색

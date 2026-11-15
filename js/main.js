@@ -9,19 +9,20 @@ import { money, subs } from './views/money.js';
 import { routine, docs, moduleView, memos, notices, report, automations, memory, auditView, searchView } from './views/life.js';
 import { assistant } from './views/assistant.js';
 import { shop } from './views/shop.js';
+import { fridge } from './views/fridge.js';
 import { settings, more, onboarding, guide, lockScreen, protectStorage } from './views/settings.js';
 import { esc, toast } from './ui.js';
 import { MODULES } from './modules.js';
 
 const ROUTES = {
   '': [home, '홈'], inbox: [inbox, '담기'], approvals: [approvals, '승인 센터'], calendar: [calendar, '일정'], tasks: [tasks, '할 일'],
-  money: [money, '머니'], subs: [subs, '구독'], routine: [routine, '루틴'], docs: [docs, '문서'], memos: [memos, '메모'], shop: [shop, '장보기'], notices: [notices, '알림'],
+  money: [money, '머니'], subs: [subs, '구독'], routine: [routine, '루틴'], docs: [docs, '문서'], memos: [memos, '메모'], shop: [shop, '장보기'], fridge: [fridge, '냉장고'], notices: [notices, '알림'],
   report: [report, '리포트'], automations: [automations, '자동화'], memory: [memory, 'AI 기억'], audit: [auditView, '실행 기록'],
   ai: [assistant, 'AI 비서'], search: [searchView, '찾기'], settings: [settings, '설정'], more: [more, '전체 메뉴'], guide: [guide, '사용법'],
 };
 const TABS = [['', '🏠', '홈'], ['calendar', '📅', '일정'], ['inbox', '📩', '담기'], ['money', '💳', '머니'], ['more', '☰', '전체']];
 // 이 화면들은 해당 저장소가 바뀌면 다시 그린다
-const WATCH = { '': '*', inbox: [], approvals: ['approvals'], calendar: ['events', 'tasks'], tasks: ['tasks'], money: ['transactions', 'budgets'], subs: ['subscriptions'], routine: ['routines', 'routineLogs'], docs: ['documents'], memos: ['memos'], shop: ['shopping'], notices: ['notices'], memory: ['memory'], m: '*' };
+const WATCH = { '': '*', inbox: [], approvals: ['approvals'], calendar: ['events', 'tasks'], tasks: ['tasks'], money: ['transactions', 'budgets'], subs: ['subscriptions'], routine: ['routines', 'routineLogs'], docs: ['documents'], memos: ['memos'], shop: ['shopping'], fridge: ['fridge'], notices: ['notices'], memory: ['memory'], m: '*' };
 
 const main = document.getElementById('view');
 let current = null, rendering = false, pending = false;

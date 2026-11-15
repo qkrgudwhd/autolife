@@ -4,9 +4,9 @@ import { APP } from './config.js';
 export const STORES = [
   'events', 'tasks', 'transactions', 'budgets', 'subscriptions', 'documents', 'routines', 'routineLogs',
   'people', 'orders', 'assets', 'study', 'clients', 'invoices', 'inbox', 'approvals', 'audit', 'memory',
-  'recipes', 'notices', 'chats', 'memos', 'settings', 'shopping',
+  'recipes', 'notices', 'chats', 'memos', 'settings', 'shopping', 'fridge',
 ];
-const VERSION = 2; // 2: shopping(장보기) 더함 — 옛 기록은 그대로
+const VERSION = 3; // 2: shopping(장보기) · 3: fridge(냉장고) — 옛 기록은 그대로
 let dbp = null;
 
 function open() {

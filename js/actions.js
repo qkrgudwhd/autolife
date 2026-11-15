@@ -121,7 +121,7 @@ export async function notice(n) {
 }
 
 export async function loadState() {
-  const names = ['events', 'tasks', 'transactions', 'budgets', 'subscriptions', 'people', 'assets', 'orders', 'study', 'invoices', 'routines', 'routineLogs', 'documents'];
+  const names = ['events', 'tasks', 'transactions', 'budgets', 'subscriptions', 'people', 'assets', 'orders', 'study', 'invoices', 'routines', 'routineLogs', 'documents', 'fridge'];
   const vals = await Promise.all(names.map((n) => db.all(n)));
   const st = Object.fromEntries(names.map((n, i) => [n, vals[i]]));
   st.expandedTomorrow = expandEvents(st.events, today(), addDays(today(), 1));
