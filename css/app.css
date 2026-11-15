@@ -29,6 +29,7 @@ p { margin: .4rem 0; } .muted { color: var(--muted); } .small { font-size: .85re
 .top { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; padding: calc(8px + env(safe-area-inset-top)) 16px 8px; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px); }
 .brand { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 1.1rem; color: var(--text); }
 .top-btns { display: flex; gap: 6px; align-items: center; }
+.brand span { white-space: nowrap; } .top-btns { gap: 2px; min-width: 0; } .top-btns .icon-btn { width: 38px; } #install { white-space: nowrap; padding: 6px 8px; } /* 좁은 휴대폰에서 이름이 두 줄로 꺾이던 것 */
 .bell { position: relative; }
 .bell[data-count]:not([data-count=""])::after { content: attr(data-count); position: absolute; top: 2px; right: 0; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px; background: var(--danger); color: #fff; font-size: 11px; line-height: 18px; text-align: center; }
 main { max-width: 760px; margin: 0 auto; padding: 4px 16px 16px; outline: none; }
