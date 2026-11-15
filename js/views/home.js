@@ -12,6 +12,7 @@ export async function home(el, ctx) {
   const left = sn.routineItems.filter((x) => !x.done);
   const m = sn.money;
   const budgetPct = m.budget ? Math.round(m.total / m.budget * 100) : null;
+  const toBuy = (await db.all('shopping')).filter((x) => !x.done && !x.archived);
 
   const senior = s.senior ? `<section class="senior-grid">
       <a class="big-btn" href="#/inbox">📩<span>문자 넣기</span></a>
@@ -41,6 +42,7 @@ export async function home(el, ctx) {
     <button class="qbtn" data-q="event">📅<span>일정<br>추가</span></button>
     <button class="qbtn" data-q="voice">🎙️<span>말로<br>하기</span></button>
   </section>
+  ${toBuy.length ? `<section class="card"><ul class="list"><li class="row"><a href="#/shop"><b>🛒 살 것 ${toBuy.length}개</b><small>${esc(toBuy.slice(0, 5).map((x) => x.name).join(', '))}${toBuy.length > 5 ? ' …' : ''}</small></a><span class="muted">›</span></li></ul></section>` : ''}
 
   ${sn.unread.length ? `<section class="card"><div class="card-head"><h2>🔔 알림 <small>${sn.unread.length}</small></h2><button class="link" data-readall>모두 읽음</button></div>
     <ul class="list">${sn.unread.slice(0, 6).map((n) => `<li class="row lvl-${n.level}"><a href="${esc(n.link || '#/notices')}" data-notice="${n.id}"><b>${esc(n.title)}</b><small>${esc(n.body)}</small></a></li>`).join('')}</ul></section>` : ''}

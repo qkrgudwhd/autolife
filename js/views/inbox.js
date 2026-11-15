@@ -9,6 +9,7 @@ import { esc, toast, won, empty, confirmBox } from '../ui.js';
 import { prettyDate, prettyTime, today } from '../core/dates.js';
 import { eventDialog, taskDialog, txDialog } from './forms.js';
 import { sendToPhoneCalendar } from './plan.js';
+import { parseShopText, isOnList } from '../core/shop.js';
 
 const EXAMPLES = [
   '11월 18일 오후 2시 부산 해운대구 좋은하루병원 예약입니다. 15분 전까지 방문해 주세요.',
@@ -55,6 +56,13 @@ export async function inbox(el, ctx) {
   async function run(text, useAI, fromHistory = false) {
     text = (text || '').trim();
     if (!text) return toast('글을 넣어 주세요');
+    if (/^\s*(장보기|살\s*것|사야\s*할\s*것)\s*[:：]/.test(text)) { // 「장보기: 우유, 계란」 → 장보기 목록으로
+      const list = parseShopText(text);
+      const cur = await db.all('shopping'); let n = 0;
+      for (const it of list) if (!isOnList(cur, it.name)) { cur.push(await db.put('shopping', { ...it, memo: '', done: false, archived: false })); n++; }
+      el.querySelector('#result').innerHTML = `<div class="card"><p>🛒 장보기 목록에 <b>${n}개</b> 담았어요${list.length - n ? ` (이미 있는 ${list.length - n}개 건너뜀)` : ''}.</p><a class="btn primary" href="#/shop">장보기 열기</a></div>`;
+      return;
+    }
     const chunks = text.split(/\n\s*\n/).map((x) => x.trim()).filter(Boolean);
     const box = el.querySelector('#result');
     box.innerHTML = '<div class="card"><p class="muted">분석 중…</p></div>';
