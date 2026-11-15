@@ -4,6 +4,8 @@ import { SHOP_CATS, parseShopText, groupShop, frequentShop, isOnList, shopText }
 import { esc, toast, empty, formDialog, listen, shareText, confirmBox } from '../ui.js';
 import { txDialog } from './forms.js';
 import { today } from '../core/dates.js';
+import { isFood } from '../core/fridge.js';
+import { shopToFridge } from './fridge.js';
 
 export async function shop(el, ctx) {
   const all = await db.all('shopping');
@@ -11,6 +13,8 @@ export async function shop(el, ctx) {
   const live = groups.flatMap((g) => g.items);
   const left = live.filter((x) => !x.done).length, got = live.length - left;
   const freq = frequentShop(all, 14);
+  const boughtFood = live.filter((x) => x.done && isFood(x.cat));
+  const food = boughtFood.length;
 
   el.innerHTML = `
   <section class="card"><div class="card-head"><h1>🛒 장보기·살 것</h1>${live.length ? `<span class="muted small">${got}/${live.length} 샀음</span>` : ''}</div>
@@ -23,8 +27,8 @@ export async function shop(el, ctx) {
     : empty('🛒', '살 것이 없어요. 위 칸에 적어 담아 보세요.')}</section>
   ${live.length ? `<section class="card"><div class="row-btns">
     <button class="btn" data-share>📤 가족에게 보내기</button>
-    ${got ? `<button class="btn" data-pay>🧾 장 본 돈 가계부에</button><button class="btn primary" data-clean>✔ 산 것 정리(${got})</button>` : ''}
-  </div><p class="muted small">「산 것 정리」를 하면 목록에서 빠지고, 「자주 사는 것」에 쌓여 다음에 한 번에 다시 담을 수 있어요.</p></section>` : ''}`;
+    ${got ? `<button class="btn" data-pay>🧾 장 본 돈 가계부에</button>${food ? `<button class="btn" data-tofridge>🧊 산 것 냉장고에(${food})</button>` : ''}<button class="btn primary" data-clean>✔ 산 것 정리(${got})</button>` : ''}
+  </div><p class="muted small">「산 것 정리」를 하면 목록에서 빠지고, 「자주 사는 것」에 쌓여 다음에 한 번에 다시 담을 수 있어요. 「냉장고에」는 먹을거리만 유통기한을 짐작해 넣고 정리까지 해요.</p></section>` : ''}`;
 
   const input = el.querySelector('#shopIn');
   const add = async (list) => {
@@ -72,6 +76,12 @@ export async function shop(el, ctx) {
     if (r !== 'canceled') await audit('shop.share', `장보기 목록 ${left}개 글로 보냄 (${r})`);
   });
   el.querySelector('[data-pay]')?.addEventListener('click', () => txDialog({ main: '식비', sub: '장보기', memo: live.filter((x) => x.done).map((x) => x.name).join(', ').slice(0, 80) }, ctx.refresh));
+  el.querySelector('[data-tofridge]')?.addEventListener('click', async () => {
+    const n = await shopToFridge(boughtFood);
+    for (const x of live.filter((y) => y.done)) await db.put('shopping', { ...x, archived: true });
+    toast(`🧊 ${n}가지 냉장고에 넣고 정리했어요`, 3500);
+    location.hash = '#/fridge';
+  });
   el.querySelector('[data-clean]')?.addEventListener('click', async () => {
     if (!(await confirmBox(`산 것 ${got}개를 목록에서 정리할까요?\n(「자주 사는 것」에는 남아요)`, '정리'))) return;
     for (const x of live.filter((y) => y.done)) await db.put('shopping', { ...x, archived: true });
