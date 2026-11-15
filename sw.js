@@ -1,11 +1,11 @@
 // 오프라인용 — 앱 파일을 기기에 담아 두어 인터넷 없이도 열린다.
 // 판을 올릴 때는 VERSION 을 바꾸면 새 파일로 갈아 끼운다 (config.js version 과 같이).
-const VERSION = 'autolife-0.1.4';
+const VERSION = 'autolife-0.1.5';
 const FILES = [
   './', 'index.html', 'manifest.webmanifest', 'css/app.css', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png',
   'js/main.js', 'js/config.js', 'js/db.js', 'js/ui.js', 'js/actions.js', 'js/modules.js', 'js/snapshot.js',
-  'js/core/dates.js', 'js/core/parser.js', 'js/core/logic.js', 'js/core/policy.js', 'js/core/automation.js', 'js/core/ai.js', 'js/core/crypt.js', 'js/core/ics.js', 'js/core/search.js',
-  'js/views/home.js', 'js/views/inbox.js', 'js/views/plan.js', 'js/views/money.js', 'js/views/life.js', 'js/views/assistant.js', 'js/views/settings.js', 'js/views/forms.js', 'js/views/quick.js',
+  'js/core/dates.js', 'js/core/parser.js', 'js/core/logic.js', 'js/core/policy.js', 'js/core/automation.js', 'js/core/ai.js', 'js/core/crypt.js', 'js/core/ics.js', 'js/core/search.js', 'js/core/shop.js',
+  'js/views/home.js', 'js/views/inbox.js', 'js/views/plan.js', 'js/views/money.js', 'js/views/life.js', 'js/views/assistant.js', 'js/views/settings.js', 'js/views/forms.js', 'js/views/quick.js', 'js/views/shop.js',
 ];
 
 // 갈아 끼우는 법 (0.1.3~):

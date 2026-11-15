@@ -23,6 +23,7 @@
   "shortcuts": [
     { "name": "문자 담기", "url": "./index.html#/inbox" },
     { "name": "지출 적기", "url": "./index.html#/money" },
+    { "name": "장보기", "url": "./index.html#/shop" },
     { "name": "AI 비서", "url": "./index.html#/ai" }
   ]
 }
