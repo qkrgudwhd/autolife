@@ -181,6 +181,16 @@ export function listen(onText, onEnd) {
 export const honor = (n) => (n ? (/님$/.test(n.trim()) ? n.trim() : `${n.trim()}님`) : '');
 
 /** 파일을 휴대폰에 넘긴다: 공유창(→ 달력 앱 등)이 되면 공유, 안 되면 내려받기 */
+/** 글 보내기 — 휴대폰은 공유 창(카톡·문자), 안 되면 복사 → 'shared' | 'copied' | 'canceled' | 'shown' */
+export async function shareText(text, title = '') {
+  try {
+    if (navigator.share) { await navigator.share({ text, title }); return 'shared'; }
+  } catch (e) { if (e.name === 'AbortError') return 'canceled'; }
+  try { await navigator.clipboard.writeText(text); toast('글을 복사했어요. 카톡·문자에 붙여 넣어 주세요', 3500); return 'copied'; } catch {}
+  modal({ title: '이 글을 길게 눌러 복사하세요', body: `<textarea class="input" rows="10" readonly>${esc(text)}</textarea>`, actions: [{ label: '닫기', primary: true }] });
+  return 'shown';
+}
+
 export async function shareFile(text, filename, mime) {
   const file = new File([text], filename, { type: mime });
   try {
