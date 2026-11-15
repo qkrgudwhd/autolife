@@ -1,6 +1,6 @@
 // 오프라인용 — 앱 파일을 기기에 담아 두어 인터넷 없이도 열린다.
 // 판을 올릴 때는 VERSION 을 바꾸면 새 파일로 갈아 끼운다 (config.js version 과 같이).
-const VERSION = 'autolife-0.1.7';
+const VERSION = 'autolife-0.1.8';
 const FILES = [
   './', 'index.html', 'manifest.webmanifest', 'css/app.css', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png',
   'js/main.js', 'js/config.js', 'js/db.js', 'js/ui.js', 'js/actions.js', 'js/modules.js', 'js/snapshot.js',
