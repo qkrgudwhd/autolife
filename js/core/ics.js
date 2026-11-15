@@ -1,6 +1,6 @@
 // 달력 파일(.ics) — 휴대폰 기본 달력(구글 캘린더·삼성 캘린더·아이폰 캘린더)과 주고받는다.
 // 내보내면 휴대폰 달력이 알림을 울려 준다 → 오토라이프를 닫아 두어도 알림이 온다.
-import { addDays, pad } from './dates.js';
+import { addDays, pad, parseYmd, prettyTime, WEEK_KO } from './dates.js';
 
 const WD = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
 const compact = (d) => d.replace(/-/g, '');
@@ -105,4 +105,19 @@ function icsTime(v, dateOnly) {
   let d = new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]);
   if (m[7]) d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]));
   return { date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`, time: `${pad(d.getHours())}:${pad(d.getMinutes())}` };
+}
+
+/** 일정을 카톡·문자로 보낼 글로 — 날짜별로 묶는다. list 는 이미 펼친(반복 포함) 일정, 날짜·시각 순 */
+export function scheduleText(list, heading = '📅 앞으로 일정') {
+  if (!list.length) return `${heading}\n일정이 없어요.`;
+  const lines = [heading];
+  let day = '';
+  for (const e of list) {
+    if (e.date !== day) {
+      day = e.date; const d = parseYmd(day);
+      lines.push('', `▶ ${d.getMonth() + 1}월 ${d.getDate()}일(${WEEK_KO[d.getDay()]})`);
+    }
+    lines.push(`· ${e.time ? prettyTime(e.time) : '종일'} ${e.title}${e.place ? ' @' + e.place : ''}`);
+  }
+  return lines.join('\n');
 }
