@@ -11,7 +11,7 @@ import { assistant } from './views/assistant.js';
 import { shop } from './views/shop.js';
 import { fridge } from './views/fridge.js';
 import { settings, more, onboarding, guide, lockScreen, protectStorage } from './views/settings.js';
-import { esc, toast } from './ui.js';
+import { esc, toast, modal } from './ui.js';
 import { MODULES } from './modules.js';
 
 const ROUTES = {
@@ -87,8 +87,33 @@ function applySettings(s) {
   r.style.setProperty('--fs', String((s.senior ? Math.max(1.2, s.fontScale) : s.fontScale) || 1));
 }
 
+/** 🎬 오른쪽 위 — 사용법 영상 3편 · 글 사용법 · (PC 판) 사용 기간 */
+async function helpMenu() {
+  const vids = (APP.videos || []).map((v, i) => `<li class="row"><a href="#" data-vid="${i}"><b>${v.icon} ${esc(v.title)}</b><small>${esc(v.desc)}${v.url ? '' : ' · 준비 중'}</small></a><span class="muted">${v.url ? '▶' : ''}</span></li>`).join('');
+  let lic = '';
+  if (location.port === '47561') { // PC 프로그램(AutoLife.exe) — 실행기가 사용 기간을 알려 준다
+    try {
+      const r = await (await fetch('/__autolife', { cache: 'no-store' })).json();
+      const L = r.license || {};
+      if (L.end) lic = `<p class="small">📅 사용 기간: <b>${esc(L.label || '')}</b> · ${esc(L.end)}까지 <span class="badge">${L.daysLeft}일 남음</span></p>`;
+    } catch { /* 실행기가 없으면 안 보임 */ }
+  }
+  const m = modal({ title: '🎬 사용법 영상', body: `<ul class="list">${vids}</ul>
+    <ul class="list"><li class="row"><a href="#/guide" data-close><b>📖 글로 보는 사용법</b><small>화면마다 쓰는 법을 차례로</small></a><span class="muted">›</span></li></ul>
+    ${lic}<p class="muted small">${esc(APP.name)} ${esc(APP.version)}${APP.support ? ' · 문의 ' + esc(APP.support) : ''}</p>` });
+  m.el.querySelectorAll('[data-vid]').forEach((a) => (a.onclick = (e) => {
+    e.preventDefault();
+    const v = APP.videos[+a.dataset.vid];
+    if (!v.url) { toast('이 영상은 준비 중이에요'); return; }
+    window.open(v.url, '_blank', 'noopener');
+  }));
+  // 창을 닫으면 뒤로 가기가 한 번 일어나므로, 닫은 뒤에 사용법으로 간다
+  m.el.querySelectorAll('[data-close]').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); m.close(); setTimeout(() => { location.hash = '#/guide'; }, 260); }));
+}
+
 async function start() {
   document.getElementById('brand').textContent = APP.name;
+  document.getElementById('helpBtn').onclick = helpMenu;
   document.documentElement.style.setProperty('--primary', APP.primary);
   document.documentElement.style.setProperty('--accent', APP.accent);
   const s = await getSettings();
