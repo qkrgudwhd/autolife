@@ -5,6 +5,7 @@
 
 import { today, addDays, diffDays, monthKey, parseYmd, prettyDate } from './dates.js';
 import { rollBilling, nextDue, nextAnniversary, contactDue, monthSummary } from './logic.js';
+import { expiryNotice } from './fridge.js';
 
 export const BUILTIN = [
   { id: 'event_tomorrow', name: '내일 일정 미리 알림', desc: '전날 내일 일정과 준비물을 알려 줍니다', group: '일정', on: true },
@@ -18,6 +19,7 @@ export const BUILTIN = [
   { id: 'contact', name: '연락할 때 됐어요', desc: '정한 연락 주기가 지난 사람을 알려 줍니다', group: '사람', on: true },
   { id: 'maintenance', name: '집·차 정기 관리', desc: '필터 교체·엔진오일·보험 갱신 등 다가오면 알려 줍니다', group: '생활', on: true, params: { days: 7 } },
   { id: 'return_deadline', name: '반품 기한', desc: '반품 기한 2일 전에 알려 줍니다', group: '쇼핑', on: true },
+  { id: 'fridge_expiry', name: '냉장고 먼저 드세요', desc: '유통기한이 오늘·내일인 음식을 아침에 알려 줍니다', group: '생활', on: true },
   { id: 'exam', name: '시험·과제 D-day', desc: '시험 7일 전·전날, 과제 마감 전날 알려 줍니다', group: '학습', on: true },
   { id: 'medicine', name: '오늘 루틴 남음', desc: '저녁까지 체크하지 않은 복약·루틴을 알려 줍니다', group: '건강', on: true },
   { id: 'doc_expiry', name: '서류 만료', desc: '여권·면허·계약 등 만료 30일 전에 알려 줍니다', group: '문서', on: true },
@@ -138,6 +140,10 @@ export function dailyScan(state, recipeSettings = {}, now = new Date()) {
   if (on('backup_reminder') && parseYmd(t).getDay() === 0 && (state.recordCount || 0) >= 20) {
     const since = state.lastBackup ? diffDays(state.lastBackup, t) : null;
     if (since === null || since >= 14) push('backup_reminder', 'week', since === null ? '아직 백업을 한 번도 안 했어요' : `마지막 백업이 ${since}일 전이에요`, `기록 ${state.recordCount}개는 이 휴대폰에만 있어요. 설정 → 💾 백업 파일 저장을 눌러 두세요.`, 'warn', '#/settings');
+  }
+  if (on('fridge_expiry') && state.fridge?.length) {
+    const n = expiryNotice(state.fridge, now);
+    if (n) push('fridge_expiry', 'today', n.title, n.body, n.level, '#/fridge');
   }
   if (on('weekly_report') && parseYmd(t).getDay() === 0) push('weekly_report', 'week', '이번 주 정리가 준비됐어요', '일정·할 일·지출·루틴을 한눈에 보세요.', 'info', '#/report');
   return out;
