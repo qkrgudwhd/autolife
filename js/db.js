@@ -4,9 +4,9 @@ import { APP } from './config.js';
 export const STORES = [
   'events', 'tasks', 'transactions', 'budgets', 'subscriptions', 'documents', 'routines', 'routineLogs',
   'people', 'orders', 'assets', 'study', 'clients', 'invoices', 'inbox', 'approvals', 'audit', 'memory',
-  'recipes', 'notices', 'chats', 'memos', 'settings',
+  'recipes', 'notices', 'chats', 'memos', 'settings', 'shopping',
 ];
-const VERSION = 1;
+const VERSION = 2; // 2: shopping(장보기) 더함 — 옛 기록은 그대로
 let dbp = null;
 
 function open() {
@@ -17,7 +17,12 @@ function open() {
       const db = r.result;
       for (const s of STORES) if (!db.objectStoreNames.contains(s)) db.createObjectStore(s, { keyPath: 'id' });
     };
-    r.onsuccess = () => res(r.result);
+    r.onsuccess = () => {
+      const d = r.result;
+      d.onversionchange = () => { d.close(); dbp = null; }; // 새 판이 저장소를 늘리려 할 때 옛 창이 막지 않게
+      res(d);
+    };
+    r.onblocked = () => console.warn('다른 창이 옛 판으로 열려 있어요 — 닫으면 이어집니다');
     r.onerror = () => rej(r.error);
   });
   return dbp;
