@@ -112,6 +112,7 @@ async function start() {
   // 설치 안내 (안드로이드 크롬)
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
+    if (location.port === '47561') return; // PC 프로그램(AutoLife.exe) 창 — 이미 설치된 것이라 설치 단추가 필요 없다
     const b = document.getElementById('install'); b.hidden = false;
     b.onclick = async () => { e.prompt(); await e.userChoice; b.hidden = true; };
   });
